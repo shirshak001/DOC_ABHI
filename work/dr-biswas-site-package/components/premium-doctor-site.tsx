@@ -593,7 +593,15 @@ function FloatingActions() {
         {emergency ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 p-5">
             <motion.div initial={{ scale: 0.94 }} animate={{ scale: 1 }} exit={{ scale: 0.94 }} className="max-w-md rounded-[2rem] bg-white p-8 shadow-luxury dark:bg-slate-950">
-              <button onClick={() => setEmergency(false)} className="ml-auto grid h-10 w-10 place-items-center rounded-full bg-slate-100 dark:bg-white/10"><X size={18} /></button>
+              <button
+                type="button"
+                aria-label="Close emergency dialog"
+                title="Close emergency dialog"
+                onClick={() => setEmergency(false)}
+                className="ml-auto grid h-10 w-10 place-items-center rounded-full bg-slate-100 dark:bg-white/10"
+              >
+                <X size={18} />
+              </button>
               <h3 className="mt-2 font-serif text-4xl text-brand-ink dark:text-white">Emergency Contact</h3>
               <p className="mt-4 text-slate-600 dark:text-slate-300">For urgent care coordination, call the priority clinic line.</p>
               <Button asChild size="lg" className="mt-6 w-full"><a href={`tel:${doctor.emergency}`}><Phone size={18} /> {doctor.emergency}</a></Button>
