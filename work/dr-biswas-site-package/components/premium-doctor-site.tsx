@@ -437,8 +437,17 @@ function Appointment() {
 
   async function onSubmit(values: AppointmentForm) {
     try {
-      await emailjs.send("demo_service", "demo_template", values, "demo_public_key");
-    } catch {
+      const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
+      const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
+      const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY;
+
+      if (serviceId && templateId && publicKey) {
+        await emailjs.send(serviceId, templateId, values, publicKey);
+      } else {
+        console.warn("EmailJS credentials not configured");
+      }
+    } catch (error) {
+      console.error("Email send failed:", error);
       await new Promise((resolve) => setTimeout(resolve, 600));
     }
     setSent(true);
