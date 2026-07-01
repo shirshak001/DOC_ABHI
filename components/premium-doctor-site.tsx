@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState, useCallback, memo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CountUp from "react-countup";
 import { Controller, useForm } from "react-hook-form";
 import { FaWhatsapp } from "react-icons/fa";
