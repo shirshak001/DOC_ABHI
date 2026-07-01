@@ -166,48 +166,50 @@ function Navbar() {
   }, [open]);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/30 bg-white/70 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/60">
-      <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 lg:px-8">
-        <Link href="#top" className="flex items-center gap-3">
-          <span className="grid h-11 w-11 place-items-center rounded-full bg-brand-blue text-lg font-bold text-white shadow-glow">
-            AB
-          </span>
-          <span>
-            <span className="block font-serif text-xl font-bold text-brand-ink dark:text-white">
-              Dr. Biswas
+    <>
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/30 bg-white/70 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/60">
+        <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 lg:px-8">
+          <Link href="#top" className="flex items-center gap-3">
+            <span className="grid h-11 w-11 place-items-center rounded-full bg-brand-blue text-lg font-bold text-white shadow-glow">
+              AB
             </span>
-            <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Senior Physician
+            <span>
+              <span className="block font-serif text-xl font-bold text-brand-ink dark:text-white">
+                Dr. Biswas
+              </span>
+              <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                Senior Physician
+              </span>
             </span>
-          </span>
-        </Link>
-        <div className="hidden items-center gap-1 lg:flex">
-          {navLinks.map(([label, id]) => (
-            <Link key={id} href={`#${id}`} className="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-brand-blue/10 hover:text-brand-blue dark:text-slate-200">
-              {label}
-            </Link>
-          ))}
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            aria-label="Toggle dark mode"
-            onClick={() => setDark(!dark)}
-            className="grid h-11 w-11 place-items-center rounded-full border border-slate-200 bg-white text-brand-ink transition hover:border-brand-blue/30 dark:border-white/10 dark:bg-white/10 dark:text-white"
-          >
-            {dark ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
-          <Button asChild className="hidden sm:inline-flex">
-            <Link href="#appointment"><CalendarDays size={18} /> Book</Link>
-          </Button>
-          <button
-            aria-label="Open menu"
-            onClick={() => setOpen(true)}
-            className="grid h-11 w-11 place-items-center rounded-full border border-slate-200 bg-white text-brand-ink lg:hidden dark:border-white/10 dark:bg-white/10 dark:text-white"
-          >
-            <Menu size={20} />
-          </button>
-        </div>
-      </nav>
+          </Link>
+          <div className="hidden items-center gap-1 lg:flex">
+            {navLinks.map(([label, id]) => (
+              <Link key={id} href={`#${id}`} className="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-brand-blue/10 hover:text-brand-blue dark:text-slate-200">
+                {label}
+              </Link>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              aria-label="Toggle dark mode"
+              onClick={() => setDark(!dark)}
+              className="grid h-11 w-11 place-items-center rounded-full border border-slate-200 bg-white text-brand-ink transition hover:border-brand-blue/30 dark:border-white/10 dark:bg-white/10 dark:text-white"
+            >
+              {dark ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+            <Button asChild className="hidden sm:inline-flex">
+              <Link href="#appointment"><CalendarDays size={18} /> Book</Link>
+            </Button>
+            <button
+              aria-label="Open menu"
+              onClick={() => setOpen(true)}
+              className="grid h-11 w-11 place-items-center rounded-full border border-slate-200 bg-white text-brand-ink lg:hidden dark:border-white/10 dark:bg-white/10 dark:text-white"
+            >
+              <Menu size={20} />
+            </button>
+          </div>
+        </nav>
+      </header>
       <AnimatePresence>
         {open ? (
           <motion.div 
@@ -215,31 +217,45 @@ function Navbar() {
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }} 
             onClick={() => setOpen(false)}
-            className="fixed inset-0 z-[60] bg-slate-950/40 lg:hidden"
+            className="fixed inset-0 z-[90] bg-slate-950/55 backdrop-blur-sm lg:hidden"
           >
             <motion.div 
               initial={{ x: "100%" }} 
               animate={{ x: 0 }} 
               exit={{ x: "100%" }} 
-              transition={{ type: "tween", duration: 0.3 }}
+              transition={{ type: "spring", stiffness: 220, damping: 28 }}
               onClick={(e) => e.stopPropagation()}
-              className="pointer-events-auto relative ml-auto h-full w-80 bg-white p-6 shadow-luxury dark:bg-slate-950"
+              className="pointer-events-auto relative ml-auto flex h-dvh w-[min(86vw,22rem)] flex-col bg-white p-6 shadow-luxury dark:bg-slate-950"
             >
-              <button aria-label="Close menu" onClick={() => setOpen(false)} className="ml-auto grid h-10 w-10 place-items-center rounded-full bg-slate-100 dark:bg-white/10">
+              <button aria-label="Close menu" onClick={() => setOpen(false)} className="ml-auto grid h-11 w-11 place-items-center rounded-full bg-slate-100 transition hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15">
                 <X size={18} />
               </button>
+              <div className="mt-8 flex items-center gap-3 border-b border-slate-200 pb-6 dark:border-white/10">
+                <span className="grid h-11 w-11 place-items-center rounded-full bg-brand-blue text-lg font-bold text-white">
+                  AB
+                </span>
+                <div>
+                  <p className="font-serif text-xl font-bold text-brand-ink dark:text-white">Dr. Biswas</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Senior Physician</p>
+                </div>
+              </div>
               <div className="mt-8 grid gap-3">
                 {navLinks.map(([label, id]) => (
-                  <Link onClick={() => setOpen(false)} key={id} href={`#${id}`} className="rounded-2xl px-4 py-3 font-semibold text-brand-ink hover:bg-blue-50 dark:text-white dark:hover:bg-white/10">
+                  <Link onClick={() => setOpen(false)} key={id} href={`#${id}`} className="rounded-2xl px-4 py-4 text-lg font-semibold text-brand-ink transition hover:bg-blue-50 hover:text-brand-blue dark:text-white dark:hover:bg-white/10">
                     {label}
                   </Link>
                 ))}
               </div>
+              <Button asChild className="mt-auto">
+                <Link onClick={() => setOpen(false)} href="#appointment">
+                  <CalendarDays size={18} /> Book Appointment
+                </Link>
+              </Button>
             </motion.div>
           </motion.div>
         ) : null}
       </AnimatePresence>
-    </header>
+    </>
   );
 }
 
