@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback, memo } from "react";
 import CountUp from "react-countup";
 import { Controller, useForm } from "react-hook-form";
 import { FaWhatsapp } from "react-icons/fa";
@@ -76,8 +76,8 @@ type AppointmentForm = z.infer<typeof formSchema>;
 const spring = { type: "spring" as const, stiffness: 80, damping: 18, mass: 0.8 };
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 38, filter: "blur(10px)" },
-  visible: { opacity: 1, y: 0, filter: "blur(0px)" }
+  hidden: { opacity: 0, y: 38 },
+  visible: { opacity: 1, y: 0 }
 };
 
 const staggerContainer = {
@@ -91,8 +91,8 @@ const staggerContainer = {
 };
 
 const cardReveal = {
-  hidden: { opacity: 0, y: 34, scale: 0.96, filter: "blur(10px)" },
-  visible: { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }
+  hidden: { opacity: 0, y: 34, scale: 0.96 },
+  visible: { opacity: 1, y: 0, scale: 1 }
 };
 
 function SectionTitle({
@@ -132,6 +132,21 @@ function useDarkMode() {
   }, [dark]);
 
   return [dark, setDark] as const;
+}
+
+function useReducedMotion() {
+  const [prefersReduced, setPrefersReduced] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReduced(mediaQuery.matches);
+    
+    const handleChange = (e: MediaQueryListEvent) => setPrefersReduced(e.matches);
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  return prefersReduced;
 }
 
 function Navbar() {
@@ -183,8 +198,21 @@ function Navbar() {
       </nav>
       <AnimatePresence>
         {open ? (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 bg-slate-950/40 lg:hidden">
-            <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} className="ml-auto h-full w-80 bg-white p-6 shadow-luxury dark:bg-slate-950">
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            onClick={() => setOpen(false)}
+            className="fixed inset-0 z-50 bg-slate-950/40 lg:hidden"
+          >
+            <motion.div 
+              initial={{ x: "100%" }} 
+              animate={{ x: 0 }} 
+              exit={{ x: "100%" }} 
+              transition={{ type: "tween", duration: 0.3 }}
+              onClick={(e) => e.stopPropagation()}
+              className="ml-auto h-full w-80 bg-white p-6 shadow-luxury dark:bg-slate-950"
+            >
               <button aria-label="Close menu" onClick={() => setOpen(false)} className="ml-auto grid h-10 w-10 place-items-center rounded-full bg-slate-100 dark:bg-white/10">
                 <X size={18} />
               </button>
@@ -205,22 +233,29 @@ function Navbar() {
 
 function Hero() {
   const { scrollY } = useScroll();
-  const y = useTransform(scrollY, [0, 700], [0, 90]);
-  const textY = useTransform(scrollY, [0, 700], [0, -42]);
-  const bgY = useTransform(scrollY, [0, 700], [0, 70]);
+  const prefersReduced = useReducedMotion();
+  
+  // Only apply parallax on desktop and if user doesn't prefer reduced motion
+  const isDesktop = typeof window !== "undefined" && window.innerWidth >= 1024;
+  const y = useTransform(scrollY, [0, 700], isDesktop && !prefersReduced ? [0, 90] : [0, 0]);
+  const textY = useTransform(scrollY, [0, 700], isDesktop && !prefersReduced ? [0, -42] : [0, 0]);
+  const bgY = useTransform(scrollY, [0, 700], isDesktop && !prefersReduced ? [0, 70] : [0, 0]);
+
+  // Reduce particle count on mobile
+  const particleCount = isDesktop ? 24 : 8;
 
   return (
     <section id="top" className="relative overflow-hidden bg-medical-gradient px-5 pt-32 lg:px-8 dark:bg-slate-950">
       <motion.div style={{ y: bgY }} className="medical-aurora absolute -inset-24 opacity-80" />
       <div className="hero-grid absolute inset-0 opacity-70" />
       <div className="absolute inset-0 overflow-hidden">
-        {Array.from({ length: 28 }).map((_, index) => (
+        {Array.from({ length: particleCount }).map((_, index) => (
           <motion.span
             key={index}
             className="absolute h-1.5 w-1.5 rounded-full bg-brand-teal/45 shadow-glow"
             style={{ left: `${8 + (index * 13) % 84}%`, top: `${14 + (index * 19) % 70}%` }}
-            animate={{ y: [0, -34, 0], x: [0, index % 2 ? 14 : -14, 0], opacity: [0.18, 0.85, 0.18], scale: [1, 1.45, 1] }}
-            transition={{ duration: 4.8 + index * 0.14, repeat: Infinity, ease: "easeInOut" }}
+            animate={prefersReduced ? {} : { y: [0, -34, 0], x: [0, index % 2 ? 14 : -14, 0], opacity: [0.18, 0.85, 0.18], scale: [1, 1.45, 1] }}
+            transition={prefersReduced ? {} : { duration: 4.8 + index * 0.14, repeat: Infinity, ease: "easeInOut" }}
           />
         ))}
       </div>
@@ -229,13 +264,12 @@ function Hero() {
           <div className="relative mx-auto max-w-xl">
             <motion.div
               className="absolute -inset-8 rounded-[2.4rem] bg-gradient-to-tr from-brand-blue/25 via-white to-brand-teal/30 blur-2xl"
-              animate={{ rotate: [0, 4, -3, 0], scale: [1, 1.04, 1] }}
-              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+              animate={prefersReduced ? { scale: 1, rotate: 0 } : { rotate: [0, 4, -3, 0], scale: [1, 1.04, 1] }}
+              transition={prefersReduced ? {} : { duration: 8, repeat: Infinity, ease: "easeInOut" }}
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, rotateY: -10 }}
-              animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-              whileHover={{ y: -10, rotate: -0.6, scale: 1.015 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
               transition={{ ...spring, delay: 0.15 }}
               className="glass shine relative overflow-hidden rounded-[2rem] p-3"
             >
@@ -280,9 +314,9 @@ function Hero() {
             compassion, and evidence-based medicine.
           </motion.p>
           <motion.div variants={fadeUp} transition={spring} className="mt-9 flex flex-wrap gap-3">
-            <motion.div whileHover={{ y: -4, scale: 1.03 }} whileTap={{ scale: 0.97 }}><Button asChild size="lg"><Link href="#appointment"><CalendarDays size={20} /> Book Appointment</Link></Button></motion.div>
-            <motion.div whileHover={{ y: -4, scale: 1.03 }} whileTap={{ scale: 0.97 }}><Button asChild size="lg" variant="secondary"><a href={`tel:${doctor.phone}`}><Phone size={20} /> Call Now</a></Button></motion.div>
-            <motion.div whileHover={{ x: 4 }}><Button asChild size="lg" variant="ghost"><Link href="#expertise">View Services</Link></Button></motion.div>
+            <motion.div whileHover={prefersReduced ? {} : { y: -4, scale: 1.03 }} whileTap={prefersReduced ? {} : { scale: 0.97 }}><Button asChild size="lg"><Link href="#appointment"><CalendarDays size={20} /> Book Appointment</Link></Button></motion.div>
+            <motion.div whileHover={prefersReduced ? {} : { y: -4, scale: 1.03 }} whileTap={prefersReduced ? {} : { scale: 0.97 }}><Button asChild size="lg" variant="secondary"><a href={`tel:${doctor.phone}`}><Phone size={20} /> Call Now</a></Button></motion.div>
+            <motion.div whileHover={prefersReduced ? {} : { x: 4 }}><Button asChild size="lg" variant="ghost"><Link href="#expertise">View Services</Link></Button></motion.div>
           </motion.div>
           <motion.svg variants={fadeUp} transition={spring} viewBox="0 0 520 100" className="mt-10 h-20 w-full max-w-xl" aria-hidden="true">
             <path className="heartbeat" d="M0 55 H90 L112 55 L132 18 L165 82 L195 44 L225 55 H520" fill="none" stroke="#14B8A6" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
