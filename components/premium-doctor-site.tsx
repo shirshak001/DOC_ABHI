@@ -153,6 +153,18 @@ function Navbar() {
   const [open, setOpen] = useState(false);
   const [dark, setDark] = useDarkMode();
 
+  // Disable body scroll when menu is open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [open]);
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-white/30 bg-white/70 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/60">
       <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 lg:px-8">
@@ -203,7 +215,7 @@ function Navbar() {
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }} 
             onClick={() => setOpen(false)}
-            className="fixed inset-0 z-50 bg-slate-950/40 lg:hidden"
+            className="fixed inset-0 z-[60] bg-slate-950/40 lg:hidden"
           >
             <motion.div 
               initial={{ x: "100%" }} 
@@ -211,7 +223,7 @@ function Navbar() {
               exit={{ x: "100%" }} 
               transition={{ type: "tween", duration: 0.3 }}
               onClick={(e) => e.stopPropagation()}
-              className="ml-auto h-full w-80 bg-white p-6 shadow-luxury dark:bg-slate-950"
+              className="pointer-events-auto relative ml-auto h-full w-80 bg-white p-6 shadow-luxury dark:bg-slate-950"
             >
               <button aria-label="Close menu" onClick={() => setOpen(false)} className="ml-auto grid h-10 w-10 place-items-center rounded-full bg-slate-100 dark:bg-white/10">
                 <X size={18} />
